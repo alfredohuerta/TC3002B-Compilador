@@ -44,21 +44,21 @@ class patitoListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by patitoParser#funcsBis.
-    def enterFuncsBis(self, ctx:patitoParser.FuncsBisContext):
-        pass
-
-    # Exit a parse tree produced by patitoParser#funcsBis.
-    def exitFuncsBis(self, ctx:patitoParser.FuncsBisContext):
-        pass
-
-
     # Enter a parse tree produced by patitoParser#cuerpo.
     def enterCuerpo(self, ctx:patitoParser.CuerpoContext):
         pass
 
     # Exit a parse tree produced by patitoParser#cuerpo.
     def exitCuerpo(self, ctx:patitoParser.CuerpoContext):
+        pass
+
+
+    # Enter a parse tree produced by patitoParser#programaBis.
+    def enterProgramaBis(self, ctx:patitoParser.ProgramaBisContext):
+        pass
+
+    # Exit a parse tree produced by patitoParser#programaBis.
+    def exitProgramaBis(self, ctx:patitoParser.ProgramaBisContext):
         pass
 
 

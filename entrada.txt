@@ -1,11 +1,23 @@
 Programa miPrograma;
+
 Vars
     x: float;
-    a, b: int;
+    a, b, c: int;
+
+Nula testFunction(test: int) {
+    Vars
+        y: float;
+        z, w: int;
+    {
+        y = test;
+    }
+};
+
 Inicio {
     a = 10;
-    b = a + 5 + 7;
-    Escribe(a, b);
-    Escribe("Hola Mundo");
+    c = 5;
+    Escribe("Valores iniciales: a =", a, ", c =", c);
+    testFunction(a);
+    Escribe("Fin del programa");
 }
 Fin

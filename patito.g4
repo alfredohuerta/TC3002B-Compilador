@@ -2,10 +2,10 @@ grammar patito;
 
 // Regla inicial del programa
 programa: PROGRAMA ID ';' vars? funcs* INICIO cuerpo FIN
+        | PROGRAMA ID ';' funcs* programaBis
+        | PROGRAMA ID ';' funcs* INICIO cuerpo* FIN
         | PROGRAMA ID ';' INICIO cuerpo FIN
         | PROGRAMA ID ';' vars? INICIO cuerpo FIN
-        | PROGRAMA ID ';' funcs* INICIO cuerpo* FIN
-        | PROGRAMA ID ';' funcs* funcsBis
         ;
 
 // Regla para la declaración de variables
@@ -20,15 +20,15 @@ funcs: NULA ID '(' ID ':' tipo ')' '{' vars cuerpo '}' ';'
      | NULA ID '(' ID ':' tipo ')' '{' cuerpo '}' ';'
      ;
 
-// Reglas para funciones adicionales
-funcsBis: funcs funcsBis
-        | INICIO cuerpo FIN
-        ;
-
 // Cuerpo de código principal
 cuerpo: '{' estatuto '}'
       | '{' estatutoBis '}'
       ;
+
+// Reglas para funciones adicionales
+programaBis: funcs programaBis
+        | INICIO cuerpo FIN
+        ;
 
 // Reglas para múltiples estatutos
 estatutoBis: estatuto estatutoBis
@@ -37,9 +37,9 @@ estatutoBis: estatuto estatutoBis
 
 // Diferentes tipos de estatutos dentro del cuerpo
 estatuto: asigna
+        | llamada
         | condicion
         | ciclo
-        | llamada
         | imprime
         ;
 
@@ -73,7 +73,9 @@ op: '+'
   ;
 
 // Términos de una expresión
-termino: factor divmult ;
+termino: factor
+       | factor divmult
+       ;
 
 // Multiplicación o división dentro de un término
 divmult: '*' factor
@@ -130,24 +132,24 @@ typeId: ',' ID ':' tipo typeId
       | ;
 
 // Palabras reservadas
+PROGRAMA: 'Programa' ;
+VARS: 'Vars' ;
+NULA: 'Nula' ;
 INICIO: 'Inicio' ;
 FIN: 'Fin' ;
 ESCRIBE: 'Escribe' ;
-NULA: 'Nula' ;
-PROGRAMA: 'Programa' ;
-SI: 'Si' ;
-SINO: 'Sino' ;
 MIENTRAS: 'Mientras' ;
 HAZ: 'Haz' ;
-VARS: 'Vars' ;
+SI: 'Si' ;
+SINO: 'Sino' ;
 
 // Tokens para tipos de datos
 INT_TOK: 'int' ;
 FLOAT_TOK:  'float' ;
 ID: [a-zA-Z] [a-zA-Z0-9_]*;
-LETRERO: '"' ~[\r\n"]* '"';
-CTE_ENT: '-'? [0-9]+;
 CTE_FLOT: '-'? [0-9]+ '.' [0-9]+;
+CTE_ENT: '-'? [0-9]+;
+LETRERO: '"' ~[\r\n"]* '"';
 
 // Ignorar espacios en blanco
 WS: [ \t\r\n]+ -> skip ;
