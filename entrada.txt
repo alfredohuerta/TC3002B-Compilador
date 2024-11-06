@@ -10,6 +10,11 @@ Nula testFunction(test: int) {
         z, w: int;
     {
         y = test;
+        Si (test > 0) {
+            Escribe("Test es positivo");
+        } Sino {
+            Escribe("Test es negativo o cero");
+        }
     }
 };
 

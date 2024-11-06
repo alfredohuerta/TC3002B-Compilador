@@ -9,11 +9,9 @@ programa: PROGRAMA ID ';' vars? funcs* INICIO cuerpo FIN
         ;
 
 // Regla para la declaración de variables
-vars: VARS cycle
-    ;
+vars: VARS var_decl+;
 
-cycle:  ID (',' ID)* ':' tipo ';' ( ID (',' ID)* ':' tipo ';' ) cycle?
-     ;
+var_decl: ID (',' ID)* ':' tipo ';';
 
 // Definición de funciones
 funcs: NULA ID '(' ID ':' tipo ')' '{' vars cuerpo '}' ';'
@@ -49,17 +47,10 @@ tipo: INT_TOK
     ;
 
 // Reglas de expresión
-expresion: exp
-         | bool exp
-         ;
+expresion: exp (relop exp)?;
 
-// Operadores booleanos
-bool: '>' exp
-    | '<' exp
-    | '>=' exp
-    | '<=' exp
-    | '==' exp
-    ;
+relop: '>' | '<' | '>=' | '<=' | '==' | '!=';
+
 
 // Expresión aritmética
 exp: termino
@@ -113,11 +104,12 @@ condicion: SI '(' expresion ')' cuerpo ';'
 imprime: ESCRIBE '(' parametros ')' ';'
        ;
 
-parametros: expresion
-          | expresion ',' parametros
-          | LETRERO
-          | LETRERO ',' parametros
-          ;
+parametros: param (',' param)* ;
+
+param: expresion
+     | LETRERO
+     ;
+
 
 // Ciclo `mientras`
 ciclo: MIENTRAS '(' expresion ')' HAZ cuerpo ';'

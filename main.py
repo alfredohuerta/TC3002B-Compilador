@@ -42,5 +42,10 @@ def main(argv):
     for var_name, var_info in semantic_analyzer.global_variables.variables.items():
         print(f"{var_name}: {var_info}")
 
+    # Print the generated quadruples
+    print("\nCuádruplos generados:")
+    for i, quad in enumerate(semantic_analyzer.quadruples):
+        print(f"{i}: {quad}")
+
 if __name__ == '__main__':
     main(sys.argv)

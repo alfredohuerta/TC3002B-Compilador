@@ -26,12 +26,12 @@ class patitoListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by patitoParser#cycle.
-    def enterCycle(self, ctx:patitoParser.CycleContext):
+    # Enter a parse tree produced by patitoParser#var_decl.
+    def enterVar_decl(self, ctx:patitoParser.Var_declContext):
         pass
 
-    # Exit a parse tree produced by patitoParser#cycle.
-    def exitCycle(self, ctx:patitoParser.CycleContext):
+    # Exit a parse tree produced by patitoParser#var_decl.
+    def exitVar_decl(self, ctx:patitoParser.Var_declContext):
         pass
 
 
@@ -98,12 +98,12 @@ class patitoListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by patitoParser#bool.
-    def enterBool(self, ctx:patitoParser.BoolContext):
+    # Enter a parse tree produced by patitoParser#relop.
+    def enterRelop(self, ctx:patitoParser.RelopContext):
         pass
 
-    # Exit a parse tree produced by patitoParser#bool.
-    def exitBool(self, ctx:patitoParser.BoolContext):
+    # Exit a parse tree produced by patitoParser#relop.
+    def exitRelop(self, ctx:patitoParser.RelopContext):
         pass
 
 
@@ -203,6 +203,15 @@ class patitoListener(ParseTreeListener):
 
     # Exit a parse tree produced by patitoParser#parametros.
     def exitParametros(self, ctx:patitoParser.ParametrosContext):
+        pass
+
+
+    # Enter a parse tree produced by patitoParser#param.
+    def enterParam(self, ctx:patitoParser.ParamContext):
+        pass
+
+    # Exit a parse tree produced by patitoParser#param.
+    def exitParam(self, ctx:patitoParser.ParamContext):
         pass
 
 

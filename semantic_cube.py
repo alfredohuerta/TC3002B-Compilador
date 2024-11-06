@@ -25,6 +25,11 @@ class Cube:
                 'float': {'int': 'float', 'float': 'float', 'bool': 'error'},
                 'bool': {'int': 'error', 'float': 'error', 'bool': 'error'}
             },
+            '=': {
+                'int': {'int': 'int', 'float': 'error', 'bool': 'error'},
+                'float': {'int': 'float', 'float': 'float', 'bool': 'error'},
+                'bool': {'int': 'error', 'float': 'error', 'bool': 'bool'}
+            },
             '==': {
                 'int': {'int': 'bool', 'float': 'bool', 'bool': 'error'},
                 'float': {'int': 'bool', 'float': 'bool', 'bool': 'error'},
@@ -68,5 +73,4 @@ class Cube:
         }
 
     def get_result_type(self, operation, type1, type2):
-        # Obtiene el resultado de la operación entre dos tipos.
         return self.cube.get(operation, {}).get(type1, {}).get(type2, 'error')
