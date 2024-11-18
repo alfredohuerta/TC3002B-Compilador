@@ -9,13 +9,11 @@ Nula testFunction(test: int) {
         y: float;
         z, w: int;
     {
-        y = test;
-        Si (test > 0) {
-            Escribe("Test es positivo");
-        } Sino {
-            Escribe("Test es negativo o cero");
-        }
-    }
+        y = 1.2;
+        Mientras (y > 1) Haz {
+            y = 0;
+            Escribe("Esto es un ciclo");
+        };
 };
 
 Inicio {

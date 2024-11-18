@@ -29,18 +29,24 @@ def main(argv):
     walker.walk(semantic_analyzer, tree)
 
     # Imprimir las tablas para verificación
+    # Print the variables of each function
     print("\nDirectorio de Funciones:")
     for func_name, func_info in semantic_analyzer.function_directory.functions.items():
         print(f"Función '{func_name}':")
         print(f"  Retorno: {func_info['return_type']}")
         print(f"  Parámetros: {func_info['parameters']}")
         print(f"  Variables Locales:")
-        for var_name, var_info in func_info['variables'].items():
+        for var_name, var_info in func_info['variables'].variables.items():
             print(f"    {var_name}: {var_info}")
 
     print("\nVariables Globales:")
     for var_name, var_info in semantic_analyzer.global_variables.variables.items():
         print(f"{var_name}: {var_info}")
+
+    # Print the constants
+    print("\nTabla de Constantes:")
+    for const_value, const_info in semantic_analyzer.constant_table.constants.items():
+        print(f"{const_value}: {const_info}")
 
     # Print the generated quadruples
     print("\nCuádruplos generados:")

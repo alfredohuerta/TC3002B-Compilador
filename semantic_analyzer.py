@@ -3,20 +3,33 @@ from antlr_files.patitoListener import patitoListener
 from function_directory import FunctionDirectory
 from variable_table import VariableTable
 from semantic_cube import Cube
+from constant_table import  ConstantTable
 
 class SemanticAnalyzer(patitoListener):
     def __init__(self):
         self.function_directory = FunctionDirectory()
-        self.global_variables = VariableTable()
+        # VariableTable maneja los contadores y las direcciones base para cada tipo.
+        self.global_variables = VariableTable(base_address=1000)
+        self.local_variables = None  # Se instanciará al entrar a una función
         self.current_function = None
         self.current_scope = 'global'
         self.cube = Cube()        # Cubo semántico
+        self.constant_table = ConstantTable()
         self.operand_stack = []   # Pila de operandos
         self.operator_stack = []  # Pila de operadores
         self.type_stack = []      # Pila de tipos
         self.jump_stack = []      # Pila de saltos
         self.quadruples = []      # Fila de cuádruplos
-        self.temp_counter = 0     # Contador para variables temporales
+        self.temp_counters = {
+            'int': 0,
+            'float': 0,
+            'bool': 0
+        }
+        self.temp_base_addresses = {
+            'int': 13000,
+            'float': 14000,
+            'bool': 15000
+        }
 
 
     # Punto neurálgico: Inicio del programa
@@ -47,15 +60,17 @@ class SemanticAnalyzer(patitoListener):
                 raise Exception(f"Error: La variable global '{var_name}' ya ha sido declarada.")
             else:
                 self.global_variables.add_variable(var_name, var_type, 'global')
-                print(f"Variable global '{var_name}' de tipo '{var_type}' agregada.")
+                address = self.global_variables.get_variable(var_name)['address']
+                print(f"Variable global '{var_name}' de tipo '{var_type}' agregada con dirección {address}.")
         else:
             if self.function_directory.variable_exists_in_function(self.current_function, var_name):
                 raise Exception(
                     f"Error: La variable '{var_name}' ya ha sido declarada en la función '{self.current_function}'.")
             else:
                 self.function_directory.add_variable_to_function(self.current_function, var_name, var_type)
-                print(
-                    f"Variable local '{var_name}' de tipo '{var_type}' agregada a la función '{self.current_function}'.")
+                var_info = self.function_directory.get_variable_from_function(self.current_function, var_name)
+                address = var_info['address']
+                print(f"Variable local '{var_name}' de tipo '{var_type}' agregada a la función '{self.current_function}' con dirección {address}.")
 
     # Punto neurálgico: Declaración de funciones
     def enterFuncs(self, ctx: patitoParser.FuncsContext):
@@ -92,21 +107,23 @@ class SemanticAnalyzer(patitoListener):
             if not var_info:
                 raise Exception(f"Error: La variable '{var_name}' no ha sido declarada.")
             else:
-                self.operand_stack.append(var_name)
+                address = var_info['address']
+                self.operand_stack.append(address)
                 self.type_stack.append(var_info['type'])
-                print(f"Uso de la variable '{var_name}' de tipo '{var_info['type']}'.")
+                print(f"Uso de la variable '{var_name}' de tipo '{var_info['type']}' con dirección {address}.")
         elif ctx.cte():
             cte_node = ctx.cte()
             if cte_node.CTE_ENT():
-                value = cte_node.CTE_ENT().getText()
-                self.operand_stack.append(value)
-                self.type_stack.append('int')
-                print(f"Constante entera '{value}' detectada.")
+                value = int(cte_node.CTE_ENT().getText())
+                const_type = 'int'
             elif cte_node.CTE_FLOT():
-                value = cte_node.CTE_FLOT().getText()
-                self.operand_stack.append(value)
-                self.type_stack.append('float')
-                print(f"Constante flotante '{value}' detectada.")
+                value = float(cte_node.CTE_FLOT().getText())
+                const_type = 'float'
+            # Add the constant to the constant table
+            address = self.constant_table.add_constant(value, const_type)
+            self.operand_stack.append(address)
+            self.type_stack.append(const_type)
+            print(f"Constante {const_type} '{value}' detectada con dirección {address}.")
 
     def enterOp(self, ctx: patitoParser.OpContext):
         operator = ctx.getText()
@@ -151,6 +168,11 @@ class SemanticAnalyzer(patitoListener):
             self.quadruples.append(quadruple)
             print(f"Generando cuádruplo: {quadruple}")
 
+    def generate_temp(self, temp_type):
+        address = self.temp_base_addresses[temp_type] + self.temp_counters[temp_type]
+        self.temp_counters[temp_type] += 1
+        return address
+
     def exitExp(self, ctx: patitoParser.ExpContext):
         if ctx.op():
             operator = self.operator_stack.pop()
@@ -163,11 +185,10 @@ class SemanticAnalyzer(patitoListener):
                 raise Exception(
                     f"Error semántico: Operación '{operator}' no permitida entre '{left_type}' y '{right_type}'.")
             else:
-                temp_var = f"t{self.temp_counter}"
-                self.temp_counter += 1
-                self.operand_stack.append(temp_var)
+                temp_address = self.generate_temp(result_type)
+                self.operand_stack.append(temp_address)
                 self.type_stack.append(result_type)
-                quadruple = (operator, left_operand, right_operand, temp_var)
+                quadruple = (operator, left_operand, right_operand, temp_address)
                 self.quadruples.append(quadruple)
                 print(f"Generando cuádruplo: {quadruple}")
 
@@ -183,11 +204,10 @@ class SemanticAnalyzer(patitoListener):
                 raise Exception(
                     f"Error semántico: Operación '{operator}' no permitida entre '{left_type}' y '{right_type}'.")
             else:
-                temp_var = f"t{self.temp_counter}"
-                self.temp_counter += 1
-                self.operand_stack.append(temp_var)
+                temp_address = self.generate_temp(result_type)
+                self.operand_stack.append(temp_address)
                 self.type_stack.append(result_type)
-                quadruple = (operator, left_operand, right_operand, temp_var)
+                quadruple = (operator, left_operand, right_operand, temp_address)
                 self.quadruples.append(quadruple)
                 print(f"Generando cuádruplo: {quadruple}")
 
@@ -229,28 +249,26 @@ class SemanticAnalyzer(patitoListener):
         if result_type == 'error':
             raise Exception(f"Error semántico: Asignación no permitida entre '{left_type}' y '{right_type}'.")
         else:
-            # Generate the quadruple
-            quadruple = (operator, right_operand, None, left_operand)
+            # Usar las direcciones virtuales
+            left_address = left_var_info['address']
+            quadruple = (operator, right_operand, None, left_address)
             self.quadruples.append(quadruple)
             print(f"Generando cuádruplo: {quadruple}")
 
     def exitImprime(self, ctx: patitoParser.ImprimeContext):
         for param in self.escribe_params:
-            if isinstance(param, str) and param.startswith('"') and param.endswith('"'):
-                # String literal
-                quadruple = ('Escribe', param, None, None)
-                self.quadruples.append(quadruple)
-                print(f"Generando cuádruplo: {quadruple}")
-            else:
-                # It's an operand (variable or temp variable)
-                quadruple = ('Escribe', param, None, None)
-                self.quadruples.append(quadruple)
-                print(f"Generando cuádruplo: {quadruple}")
+            # param is the address of the operand or constant
+            quadruple = ('Escribe', param, None, None)
+            self.quadruples.append(quadruple)
+            print(f"Generando cuádruplo: {quadruple}")
 
     def exitParam(self, ctx: patitoParser.ParamContext):
         if ctx.LETRERO():
             text = ctx.LETRERO().getText()
-            self.escribe_params.append(text)
+            # Add the string constant to the constant table
+            address = self.constant_table.add_constant(text, 'string')
+            self.escribe_params.append(address)
+            print(f"Constante string {text} detectada con dirección {address}.")
         elif ctx.expresion():
             # The expression has been processed; operand is on top of the stack
             operand = self.operand_stack.pop()
@@ -258,7 +276,7 @@ class SemanticAnalyzer(patitoListener):
             self.escribe_params.append(operand)
 
     def exitExpresion(self, ctx: patitoParser.ExpresionContext):
-        # Check if there are more than one child (indicating the presence of a relational operation)
+        # Procesar operación relacional si existe
         if len(ctx.children) == 3:
             operator = ctx.getChild(1).getText()
             # Pop right operand and type
@@ -267,65 +285,66 @@ class SemanticAnalyzer(patitoListener):
             # Pop left operand and type
             left_operand = self.operand_stack.pop()
             left_type = self.type_stack.pop()
-            # Get the result type from the semantic cube
+            # Obtener el tipo resultante del cubo semántico
             result_type = self.cube.get_result_type(operator, left_type, right_type)
             if result_type == 'error':
                 raise Exception(
                     f"Error semántico: Operación relacional '{operator}' no permitida entre '{left_type}' y '{right_type}'.")
             else:
-                # Create a temporary variable to store the result
-                temp_var = f"t{self.temp_counter}"
-                self.temp_counter += 1
-                self.operand_stack.append(temp_var)
+                # Generar una dirección temporal para el resultado
+                temp_address = self.generate_temp(result_type)
+                self.operand_stack.append(temp_address)
                 self.type_stack.append(result_type)
-                # Generate the quadruple
-                quadruple = (operator, left_operand, right_operand, temp_var)
+                # Generar el cuádruplo
+                quadruple = (operator, left_operand, right_operand, temp_address)
                 self.quadruples.append(quadruple)
                 print(f"Generando cuádruplo: {quadruple}")
 
-    def exitCondicion(self, ctx: patitoParser.CondicionContext):
-        # Pop the expression type and operand
-        exp_type = self.type_stack.pop()
-        if exp_type != 'bool':
-            raise Exception("Error: La expresión en el 'Si' no es booleana.")
-        else:
-            result = self.operand_stack.pop()
-            # Generate the GOTOF quadruple
-            quadruple = ('GOTOF', result, None, None)
-            self.quadruples.append(quadruple)
-            false_jump = len(self.quadruples) - 1
-            self.jump_stack.append(false_jump)
-            print(f"Generando cuádruplo: {quadruple}")
+        # Ahora, si la expresión es parte de una condición, verificar el tipo
+        if isinstance(ctx.parentCtx, patitoParser.CondicionContext):
+            # Pop the expression type and operand
+            exp_type = self.type_stack.pop()
+            if exp_type != 'bool':
+                raise Exception("Error: La expresión en el 'Si' no es booleana.")
+            else:
+                result = self.operand_stack.pop()
+                # Generate the GOTOF quadruple
+                quadruple = ('GOTOF', result, None, None)
+                self.quadruples.append(quadruple)
+                false_jump = len(self.quadruples) - 1
+                self.jump_stack.append(false_jump)
+                print(f"Generando cuádruplo: {quadruple}")
 
+    def exitCondicion(self, ctx: patitoParser.CondicionContext):
         if ctx.SINO():
-            # Generate GOTO to jump over the else block
+            # Generar GOTO para saltar el bloque del 'Sino' después de ejecutar el 'Si'
             quadruple = ('GOTO', None, None, None)
             self.quadruples.append(quadruple)
             end_jump = len(self.quadruples) - 1
-            # Backpatch the false jump to point to the else block
+            # Backpatch del salto falso al inicio del bloque 'Sino'
             false_jump = self.jump_stack.pop()
-            self.quadruples[false_jump] = self.quadruples[false_jump][:3] + (len(self.quadruples),)
-            print(f"Actualizando cuádruplo en posición {false_jump} con salto a {len(self.quadruples)}")
-            # Push the end jump to backpatch after the else block
+            self.quadruples[false_jump] = self.quadruples[false_jump][:3] + (false_jump + 1,)
+            print(f"Actualizando cuádruplo en posición {false_jump} con salto a {false_jump + 1}")
+            # Guardar el índice del GOTO para backpatching después del 'Sino'
             self.jump_stack.append(end_jump)
-            # After processing the else block, backpatch the end jump
+            # Después de procesar el 'Sino', hacer backpatch del GOTO al final
             end_jump = self.jump_stack.pop()
             self.quadruples[end_jump] = self.quadruples[end_jump][:3] + (len(self.quadruples),)
             print(f"Actualizando cuádruplo en posición {end_jump} con salto a {len(self.quadruples)}")
         else:
-            # No else part
+            # Sin bloque 'Sino', hacer backpatch directo
             false_jump = self.jump_stack.pop()
-            # Backpatch the false jump to point to the next instruction
             self.quadruples[false_jump] = self.quadruples[false_jump][:3] + (len(self.quadruples),)
             print(f"Actualizando cuádruplo en posición {false_jump} con salto a {len(self.quadruples)}")
 
     def get_variable_info(self, var_name):
-        # Primero, buscar en las variables locales (incluyendo parámetros)
+        # Buscar en variables locales
         if self.current_scope == 'local':
-            function = self.function_directory.get_function(self.current_function)
-            if function:
-                if var_name in function['variables']:
-                    return function['variables'][var_name]
-        # Luego, buscar en las variables globales
-        return self.global_variables.get_variable(var_name)
-
+            var_info = self.function_directory.get_variable_from_function(self.current_function, var_name)
+            if var_info:
+                return var_info
+        # Buscar en variables globales
+        var_info = self.global_variables.get_variable(var_name)
+        if var_info:
+            return var_info
+        return None
