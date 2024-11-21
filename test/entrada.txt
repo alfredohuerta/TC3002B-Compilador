@@ -1,0 +1,13 @@
+Programa miPrograma;
+
+Vars
+    x, y, z: float;
+    a, b, c: int;
+
+Inicio {
+    a = 1;
+    b = 2;
+    c = a - b;
+    y = x + c;
+}
+Fin

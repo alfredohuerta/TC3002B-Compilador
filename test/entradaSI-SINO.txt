@@ -1,0 +1,17 @@
+Programa miPrograma;
+
+Vars
+    x: float;
+    a, b, c: int;
+
+Inicio {
+    a = 1;
+    b= 2;
+    Si (a > 0) {
+        Escribe("Esto es verdadero");
+    } Sino {
+        Escribe("Esto es falso");
+    }
+    Escribe("Fin del Programa");
+};
+Fin

@@ -17,7 +17,7 @@ def main(argv):
     stream = CommonTokenStream(lexer)
     parser = patitoParser(stream)
 
-    # Llamar a la regla inicial de la gramática (ajusta si es necesario)
+    # Llamar a la regla inicial de la gramática
     tree = parser.programa()
 
     # Imprimir el árbol de análisis

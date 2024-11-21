@@ -1,0 +1,10 @@
+Programa miPrograma;
+
+Vars
+    x, y, z: float;
+    a, b, c: int;
+
+Inicio {
+    Escribe("Esto es un letrero");
+}
+Fin
