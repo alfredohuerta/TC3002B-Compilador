@@ -35,6 +35,7 @@ class SemanticAnalyzer(patitoListener):
             'float': 14000,
             'bool': 15000
         }
+        self.function_addresses = {}  # Añadido
 
 
     # Punto neurálgico: Inicio del programa
@@ -120,6 +121,9 @@ class SemanticAnalyzer(patitoListener):
             self.current_scope = 'local' # Declara el ámbito de la función como local, será utilizado para las variables
             print(f"Función '{func_name}' agregada al Directorio de Funciones.")
 
+            self.function_addresses[func_name] = len(self.quadruples)
+            print(f"Dirección de inicio de la función '{func_name}' registrada en {self.function_addresses[func_name]}.")
+
             # Agregar el parámetro a la tabla de variables locales de la función a través del directorio de variables
             self.function_directory.add_variable_to_function(self.current_function, param_name, param_type)
             print(f"Parámetro '{param_name}' de tipo '{param_type}' agregado a la función '{self.current_function}'.")
@@ -130,6 +134,10 @@ class SemanticAnalyzer(patitoListener):
         :param ctx:
         :return:
         """
+        quadruple = ('RET', None, None, None) # Generamos el cuádruplo de retorno para que vuelva al main al terminar la función
+        self.quadruples.append(quadruple)
+        print(f"Generando cuádruplo: {quadruple}")
+
         self.current_scope = 'global' # Restablece el ámbito actual al global
         self.current_function = None # Restablece en qué función se encuentran
 

@@ -1,13 +1,11 @@
 Programa miPrograma;
-
 Vars
-    x, y, z: float;
     a, b, c: int;
-
-Inicio {
-    a = 1;
-    b = 2;
-    c = a - b;
-    y = x + c;
+Inicio
+{
+    a = 5;
+    b = 10;
+    c = a + b;
+    Escribe(c);
 }
 Fin

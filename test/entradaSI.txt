@@ -8,7 +8,7 @@ Inicio {
     a = 1;
     b= 2;
     Si (a > 0) {
-        Escribe("Esto es verdadero");
+        Escribe("Esto es verdadero", a);
     };
     Escribe("Fin del programa");
 }
