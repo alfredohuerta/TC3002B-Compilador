@@ -46,7 +46,7 @@ class SemanticAnalyzer(patitoListener):
         :return:
         """
         self.current_scope = 'global' # Establece el alcance actual como global
-        print("Inicio del análisis semántico del programa.")
+        #print("Inicio del análisis semántico del programa.")
 
     # Punto neurálgico: Declaración de variables
     def enterVars(self, ctx: patitoParser.VarsContext):
@@ -87,7 +87,7 @@ class SemanticAnalyzer(patitoListener):
             else: # Si no ha sido declarada, la agrega a la tabla de variables como vaariable global
                 self.global_variables.add_variable(var_name, var_type, 'global') # Registra los datos de la variable
                 address = self.global_variables.get_variable(var_name)['address']
-                print(f"Variable global '{var_name}' de tipo '{var_type}' agregada con dirección {address}.")
+                #print(f"Variable global '{var_name}' de tipo '{var_type}' agregada con dirección {address}.")
         else: # si el ámbito no es global, por descarte es local
             if self.function_directory.variable_exists_in_function(self.current_function, var_name): # Verifica que si ha sido registrada
                 raise Exception(
@@ -96,7 +96,7 @@ class SemanticAnalyzer(patitoListener):
                 self.function_directory.add_variable_to_function(self.current_function, var_name, var_type)
                 var_info = self.function_directory.get_variable_from_function(self.current_function, var_name)
                 address = var_info['address']
-                print(f"Variable local '{var_name}' de tipo '{var_type}' agregada a la función '{self.current_function}' con dirección {address}.")
+                #print(f"Variable local '{var_name}' de tipo '{var_type}' agregada a la función '{self.current_function}' con dirección {address}.")
 
     # Punto neurálgico: Declaración de funciones
     def enterFuncs(self, ctx: patitoParser.FuncsContext):
@@ -119,14 +119,14 @@ class SemanticAnalyzer(patitoListener):
             self.function_directory.add_function(func_name, return_type, parameters) # Registra ID, tipo de return y parámetros
             self.current_function = func_name
             self.current_scope = 'local' # Declara el ámbito de la función como local, será utilizado para las variables
-            print(f"Función '{func_name}' agregada al Directorio de Funciones.")
+            #print(f"Función '{func_name}' agregada al Directorio de Funciones.")
 
             self.function_addresses[func_name] = len(self.quadruples)
-            print(f"Dirección de inicio de la función '{func_name}' registrada en {self.function_addresses[func_name]}.")
+            #print(f"Dirección de inicio de la función '{func_name}' registrada en {self.function_addresses[func_name]}.")
 
             # Agregar el parámetro a la tabla de variables locales de la función a través del directorio de variables
             self.function_directory.add_variable_to_function(self.current_function, param_name, param_type)
-            print(f"Parámetro '{param_name}' de tipo '{param_type}' agregado a la función '{self.current_function}'.")
+            #print(f"Parámetro '{param_name}' de tipo '{param_type}' agregado a la función '{self.current_function}'.")
 
     def exitFuncs(self, ctx: patitoParser.FuncsContext):
         """
@@ -136,7 +136,7 @@ class SemanticAnalyzer(patitoListener):
         """
         quadruple = ('RET', None, None, None) # Generamos el cuádruplo de retorno para que vuelva al main al terminar la función
         self.quadruples.append(quadruple)
-        print(f"Generando cuádruplo: {quadruple}")
+        #print(f"Generando cuádruplo: {quadruple}")
 
         self.current_scope = 'global' # Restablece el ámbito actual al global
         self.current_function = None # Restablece en qué función se encuentran
@@ -158,7 +158,7 @@ class SemanticAnalyzer(patitoListener):
                 address = var_info['address'] # Guardamos la dirección de memoria
                 self.operand_stack.append(address) # Actualizamos el stack de operandos
                 self.type_stack.append(var_info['type']) # Actualizamos es stack de tipos
-                print(f"Uso de la variable '{var_name}' de tipo '{var_info['type']}' con dirección {address}.")
+                #print(f"Uso de la variable '{var_name}' de tipo '{var_info['type']}' con dirección {address}.")
         elif ctx.cte(): # Identificamos si es una constante
             cte_node = ctx.cte() # Asignamos el valor del contexto en una variable
             if cte_node.CTE_ENT(): # Identificamos si es un entero
@@ -171,7 +171,7 @@ class SemanticAnalyzer(patitoListener):
             address = self.constant_table.add_constant(value, const_type) # Asignamos una dirección de memoria
             self.operand_stack.append(address) # Guardamos la constante en el stack de operandos
             self.type_stack.append(const_type) # Guardamos la constante en el stack de tipos
-            print(f"Constante {const_type} '{value}' detectada con dirección {address}.")
+            #print(f"Constante {const_type} '{value}' detectada con dirección {address}.")
 
     def enterOp(self, ctx: patitoParser.OpContext):
         """
@@ -182,7 +182,7 @@ class SemanticAnalyzer(patitoListener):
         operator = ctx.getText() # Almacenamos el char en una variable
         if operator in ['+', '-']:
             self.operator_stack.append(operator) # Añadimos el char en el stack de operadores
-            print(f"Operador '{operator}' detectado y agregado a la pila de operadores.")
+            #print(f"Operador '{operator}' detectado y agregado a la pila de operadores.")
 
     def enterDivmult(self, ctx: patitoParser.DivmultContext):
         """
@@ -193,7 +193,7 @@ class SemanticAnalyzer(patitoListener):
         operator = ctx.getText() # Almacenamos el char en una variable
         if operator in ['*', '/']:
             self.operator_stack.append(operator) # Añadimos el char en el stack de operadores
-            print(f"Operador '{operator}' detectado y agregado a la pila de operadores.")
+            #print(f"Operador '{operator}' detectado y agregado a la pila de operadores.")
 
     def enterCondicion(self, ctx: patitoParser.CondicionContext):
         # No se hace nada aquí, este punto está integrado en exit_Expression
@@ -207,7 +207,7 @@ class SemanticAnalyzer(patitoListener):
         """
         # Registra el índice al inicio de un ciclo para su salto
         self.jump_stack.append(len(self.quadruples))
-        print(f"Guardando el inicio del ciclo en la pila de saltos: {len(self.quadruples)}")
+        #print(f"Guardando el inicio del ciclo en la pila de saltos: {len(self.quadruples)}")
 
     def enterAsigna(self, ctx: patitoParser.AsignaContext):
         """
@@ -234,10 +234,10 @@ class SemanticAnalyzer(patitoListener):
         else:
             quadruple = ('ERA', func_name, None, None) # Generamos el cuádruplo de la función con su nombre para su activación
             self.quadruples.append(quadruple) # Añadimos el cuádruplo a la lista
-            print(f"Generando cuádruplo: {quadruple}")
+            #print(f"Generando cuádruplo: {quadruple}")
             quadruple = ('GOSUB', func_name, None, None) # Generamos el cuádruplo para ir a la función
             self.quadruples.append(quadruple) # Añadimos el cuádruplo a la lista
-            print(f"Generando cuádruplo: {quadruple}")
+            #print(f"Generando cuádruplo: {quadruple}")
 
     def generate_temp(self, temp_type):
         """
@@ -275,7 +275,7 @@ class SemanticAnalyzer(patitoListener):
                 self.type_stack.append(result_type) # Guardamos el tipo del temporal
                 quadruple = (operator, left_operand, right_operand, temp_address) # Construimos el cuádruplo con los datos
                 self.quadruples.append(quadruple) # Agregamos el cuádruplo nuevo en la lista de cuádruplos
-                print(f"Generando cuádruplo: {quadruple}")
+                #print(f"Generando cuádruplo: {quadruple}")
 
     def exitTermino(self, ctx: patitoParser.TerminoContext):
         """
@@ -303,7 +303,7 @@ class SemanticAnalyzer(patitoListener):
                 quadruple = (
                 operator, left_operand, right_operand, temp_address)  # Construimos el cuádruplo con los datos
                 self.quadruples.append(quadruple)  # Agregamos el cuádruplo nuevo en la lista de cuádruplos
-                print(f"Generando cuádruplo: {quadruple}")
+                #print(f"Generando cuádruplo: {quadruple}")
 
     def exitCiclo(self, ctx: patitoParser.CicloContext):
         """
@@ -318,17 +318,17 @@ class SemanticAnalyzer(patitoListener):
             # Generate the GOTOF quadruple
             quadruple_gotof = ('GOTOF', result, None, None) # Actualizamos el cuádruplo con el valor del operando
             self.quadruples.append(quadruple_gotof) # Añadimos el cuádruplo a la lista
-            print(f"Generando cuádruplo: {quadruple_gotof}")
+            #print(f"Generando cuádruplo: {quadruple_gotof}")
             false_jump = len(self.quadruples) - 1 # Salvamos el índice para más tarde
 
             loop_start = self.jump_stack.pop() # Recuperamos el índice del inicio del loop
             quadruple_goto = ('GOTO', None, None, loop_start) # Generamos el cuádruplo de TRUE del ciclo y lo apuntamos al inicio
             self.quadruples.append(quadruple_goto) # Añadimos el cuádruplo a la lista de cuádruplos
-            print(f"Generando cuádruplo: {quadruple_goto}")
+            #print(f"Generando cuádruplo: {quadruple_goto}")
 
             # Actualizamos el valor del cuádruplo para el FALSE con el índice actual (final del ciclo)
             self.quadruples[false_jump] = self.quadruples[false_jump][:3] + (len(self.quadruples),)
-            print(f"Actualizando cuádruplo en posición {false_jump} con salto a {len(self.quadruples)}")
+            #print(f"Actualizando cuádruplo en posición {false_jump} con salto a {len(self.quadruples)}")
 
     def exitAsigna(self, ctx: patitoParser.AsignaContext):
         """
@@ -353,14 +353,14 @@ class SemanticAnalyzer(patitoListener):
             left_address = left_var_info['address'] # Generamos la dirección de memoria
             quadruple = (operator, right_operand, None, left_address) # Generamos el cuádruplo de asignación
             self.quadruples.append(quadruple) # Añadimos el cuádruplo a la lista
-            print(f"Generando cuádruplo: {quadruple}")
+            #print(f"Generando cuádruplo: {quadruple}")
 
     def exitImprime(self, ctx: patitoParser.ImprimeContext):
         for param in self.escribe_params:
             # param is the address of the operand or constant
             quadruple = ('Escribe', param, None, None)
             self.quadruples.append(quadruple)
-            print(f"Generando cuádruplo: {quadruple}")
+            #print(f"Generando cuádruplo: {quadruple}")
 
     def exitParam(self, ctx: patitoParser.ParamContext):
         if ctx.LETRERO():
@@ -368,7 +368,7 @@ class SemanticAnalyzer(patitoListener):
             # Add the string constant to the constant table
             address = self.constant_table.add_constant(text, 'string')
             self.escribe_params.append(address)
-            print(f"Constante string {text} detectada con dirección {address}.")
+            #print(f"Constante string {text} detectada con dirección {address}.")
         elif ctx.expresion():
             # The expression has been processed; operand is on top of the stack
             operand = self.operand_stack.pop()
@@ -401,7 +401,7 @@ class SemanticAnalyzer(patitoListener):
                 quadruple = (
                 operator, left_operand, right_operand, temp_address)  # Construimos el cuádruplo con los datos
                 self.quadruples.append(quadruple)  # Agregamos el cuádruplo nuevo en la lista de cuádruplos
-                print(f"Generando cuádruplo: {quadruple}")
+                #print(f"Generando cuádruplo: {quadruple}")
 
         # Identificamos si el contexto padre es el de una condicional
         if isinstance(ctx.parentCtx, patitoParser.CondicionContext):
@@ -415,7 +415,7 @@ class SemanticAnalyzer(patitoListener):
                 false_jump = len(self.quadruples) - 1 # Guardamos el índice actual para regresar más tarde a actualizar
                                                       # la dirección del cuádruplo
                 self.jump_stack.append(false_jump) # Guardamos el índice en el stack de saltos
-                print(f"Generando cuádruplo: {quadruple}")
+                #print(f"Generando cuádruplo: {quadruple}")
 
     def exitCondicion(self, ctx: patitoParser.CondicionContext):
         """
@@ -430,18 +430,18 @@ class SemanticAnalyzer(patitoListener):
             self.quadruples.append(quadruple) # Añade el cuádruplo a la lista de cuádruplos
             end_jump = len(self.quadruples) - 1 # Índice actual que se usará más tarde
             self.quadruples[false_jump] = self.quadruples[false_jump][:3] + (false_jump + 1) # Actualizamos el valor del salto
-            print(f"Actualizando cuádruplo en posición FALSE JUMP {false_jump} con salto a {false_jump + 1}")
+            #print(f"Actualizando cuádruplo en posición FALSE JUMP {false_jump} con salto a {false_jump + 1}")
             # Guardar el índice del GOTO para backpatching después del 'Sino'
             self.jump_stack.append(end_jump) # Agregamos el salto al jump_stack
             # Después de procesar el 'Sino', hacer backpatch del GOTO al final
             end_jump = self.jump_stack.pop() # Obtenemos el valor del salto
             self.quadruples[end_jump] = self.quadruples[end_jump][:3] + (len(self.quadruples),) # Actualizamos el valor del salto
-            print(f"Actualizando cuádruplo en posición {end_jump} con salto a {len(self.quadruples)}")
+            #print(f"Actualizando cuádruplo en posición {end_jump} con salto a {len(self.quadruples)}")
         else:
             # Sin bloque 'Sino', hacer backpatch directo
             false_jump = self.jump_stack.pop()
             self.quadruples[false_jump] = self.quadruples[false_jump][:3] + (len(self.quadruples),)
-            print(f"Actualizando cuádruplo en posición {false_jump} con salto a {len(self.quadruples)}")
+            #print(f"Actualizando cuádruplo en posición {false_jump} con salto a {len(self.quadruples)}")
 
     def get_variable_info(self, var_name):
         """

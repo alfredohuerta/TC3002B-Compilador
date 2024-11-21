@@ -43,7 +43,7 @@ class VirtualMachine:
             quad = self.quadruples[self.instruction_pointer]
             op, arg1, arg2, result = quad # Descomponemos el cuádruplo en sus elementos principales
             # Desplegar la ejecución del cuádruplo
-            print(f"Ejecutando cuádruplo: {quad} en IP = {self.instruction_pointer}")
+            #print(f"Ejecutando cuádruplo: {quad} en IP = {self.instruction_pointer}")
             # Ejecutar el cuádruplo correspondiente
             self.execute_quadruple(op, arg1, arg2, result)
             # Avanzar el puntero de instrucción
@@ -148,7 +148,7 @@ class VirtualMachine:
     def execute_write(self, value_addr):
         """
         Función que despliega un mensaje en la consola
-        :param value_addr: dirección de memoria del valor a des´plegar
+        :param value_addr: dirección de memoria del valor a desplegar
         :return:
         """
         value = self.get_value(value_addr)
@@ -239,7 +239,7 @@ class VirtualMachine:
         :param address: direccion de memoria del valor a buscar
         :return: valor de la variable | valor de la constante | Error
         """
-        if self.is_constant_address(address): # Llamamos función auxiliar para identificar el segemento
+        if self.is_constant_address(address): # Llamamos función auxiliar para identificar el segmento
             return self.memory['constants'].get(address, None)
         elif self.is_global_address(address):
             return self.memory['global'].get(address, None)

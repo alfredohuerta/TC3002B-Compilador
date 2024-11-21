@@ -1,0 +1,21 @@
+Programa miPrograma;
+
+Vars
+    x: float;
+    a, b, c: int;
+
+Nula funcionPrueba(num: int) {
+    Inicio {
+        c = a + b;
+        Escribe("El doble de", num, "es", c);
+    }
+};
+
+Inicio {
+    a = 5;
+    b = 10;
+    funcionPrueba(a);
+    funcionPrueba(b);
+    Escribe("Fin del programa");
+}
+Fin

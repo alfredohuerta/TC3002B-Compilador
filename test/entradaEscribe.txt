@@ -6,5 +6,6 @@ Vars
 
 Inicio {
     Escribe("Esto es un letrero");
+    Escribe("Esto es una constante", 7);
 }
 Fin

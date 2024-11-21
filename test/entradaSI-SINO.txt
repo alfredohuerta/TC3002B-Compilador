@@ -11,7 +11,7 @@ Inicio {
         Escribe("Esto es verdadero");
     } Sino {
         Escribe("Esto es falso");
-    }
+    };
     Escribe("Fin del Programa");
 };
 Fin
